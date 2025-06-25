@@ -8,6 +8,8 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 
 	"Glur/internal/ui"
+	"Glur/internal/font"
+	"Glur/internal/shapes"
 	"Glur/internal/render"
 )
 
@@ -25,10 +27,26 @@ func main() {
 	}
 
 	win := ui.PrimaryWindow()
-	render.Setup()
+
+	vao := render.Canvas(shapes.QuadUV())
+	img := font.RenderTextImage("Hello boss")
+	tex := render.TextureImage(img)
+
+	pg := render.Setup()
 
 	for !win.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT)
+		gl.UseProgram(pg)
+
+		gl.BindVertexArray(vao)
+
+		gl.ActiveTexture(gl.TEXTURE0)
+		gl.BindTexture(gl.TEXTURE_2D, tex)
+
+		loc := gl.GetUniformLocation(pg, gl.Str("tex\x00"))
+		gl.Uniform1i(loc, 0)
+
+		gl.DrawArrays(gl.TRIANGLES, 0, 6)
 
 		win.SwapBuffers()
 		glfw.PollEvents()
