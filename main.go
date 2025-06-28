@@ -8,8 +8,7 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 
 	"Glur/internal/ui"
-	"Glur/internal/font"
-	"Glur/internal/shapes"
+	"Glur/internal/views"
 	"Glur/internal/render"
 )
 
@@ -27,26 +26,21 @@ func main() {
 	}
 
 	win := ui.PrimaryWindow()
-
-	vao := render.Canvas(shapes.QuadUV())
-	img := font.RenderTextImage("Hello boss")
-	tex := render.TextureImage(img)
-
 	pg := render.Setup()
 
+	hv := home.NewHomeView(pg)
+
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LESS)
 	for !win.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT)
 		gl.UseProgram(pg)
 
-		gl.BindVertexArray(vao)
+		hv.Render()
 
-		gl.ActiveTexture(gl.TEXTURE0)
-		gl.BindTexture(gl.TEXTURE_2D, tex)
-
-		loc := gl.GetUniformLocation(pg, gl.Str("tex\x00"))
-		gl.Uniform1i(loc, 0)
-
-		gl.DrawArrays(gl.TRIANGLES, 0, 6)
+		if err := gl.GetError(); err != gl.NO_ERROR {
+			log.Println("OpenGL error. \nErr: ", err)
+		}
 
 		win.SwapBuffers()
 		glfw.PollEvents()
